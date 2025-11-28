@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DailySideQuestGenerator", "DailySideQuestGenerator\DailySideQuestGenerator.csproj", "{B541F781-847E-4D08-B0E8-DF2EB3730C59}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DailySideQuestGenerator.Tests", "DailySideQuestGenerator.Tests\DailySideQuestGenerator.Tests.csproj", "{21051734-2E02-4A93-828B-784DDC339A58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{B541F781-847E-4D08-B0E8-DF2EB3730C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B541F781-847E-4D08-B0E8-DF2EB3730C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B541F781-847E-4D08-B0E8-DF2EB3730C59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21051734-2E02-4A93-828B-784DDC339A58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21051734-2E02-4A93-828B-784DDC339A58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21051734-2E02-4A93-828B-784DDC339A58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21051734-2E02-4A93-828B-784DDC339A58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
