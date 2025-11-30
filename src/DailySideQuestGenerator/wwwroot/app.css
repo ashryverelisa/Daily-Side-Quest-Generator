@@ -1,39 +1,60 @@
-html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: #0f172a; /* dark background */
+    color: #e6eef8;
+    margin: 0;
+    padding: 0;
 }
 
-a, .btn-link {
-    color: #006bb7;
+.app-shell {
+    max-width: 900px;
+    margin: 24px auto;
+    padding: 20px;
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
 }
 
-.content {
-    padding-top: 1.1rem;
+.quest-title {
+    font-weight: 600;
+    font-size: 1.05rem;
 }
 
-h1:focus {
-    outline: none;
+.quest-meta {
+    font-size: 0.9rem;
+    opacity: 0.85;
 }
 
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+.quest-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
-.invalid {
-    outline: 1px solid #e50000;
+.complete-btn {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    color: inherit;
+    cursor: pointer;
 }
 
-.validation-message {
-    color: #e50000;
+.complete-btn.completed {
+    background: linear-gradient(90deg,#16a34a,#22c55e);
+    color: #021014;
 }
 
 .blazor-error-boundary {
