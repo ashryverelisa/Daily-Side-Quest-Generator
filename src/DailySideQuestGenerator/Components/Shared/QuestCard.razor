@@ -1,0 +1,13 @@
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div class="quest-title">@Quest.Title</div>
+            <div class="quest-meta">@Quest.Category • @Quest.XP XP</div>
+        </div>
+        <div class="quest-actions">
+            <button class="@CompleteButtonClass" @onclick="ToggleComplete">
+                @ButtonText
+            </button>
+        </div>
+    </div>
+</div>
