@@ -7,7 +7,7 @@ public class QuestServiceTests
     [Fact]
     public async Task Initialize_Populates_Templates()
     {
-        var svc = new QuestService();
+        var svc = new QuestService(new CategoryService());
 
         await svc.InitializeIfNeededAsync();
         var templates = await svc.GetAllTemplatesAsync();
@@ -19,7 +19,7 @@ public class QuestServiceTests
     [Fact]
     public async Task Initialize_Called_Twice_Does_Not_Duplicate_Templates()
     {
-        var svc = new QuestService();
+        var svc = new QuestService(new CategoryService());
 
         await svc.InitializeIfNeededAsync();
         await svc.InitializeIfNeededAsync();
@@ -31,7 +31,7 @@ public class QuestServiceTests
     [Fact]
     public async Task GetProgressAsync_Returns_Zeroed_State_Before_Completion()
     {
-        var svc = new QuestService();
+        var svc = new QuestService(new CategoryService());
 
         await svc.InitializeIfNeededAsync();
         var progress = await svc.GetProgressAsync();
@@ -44,7 +44,7 @@ public class QuestServiceTests
     [Fact]
     public async Task ToggleComplete_InvalidQuest_Throws()
     {
-        var svc = new QuestService();
+        var svc = new QuestService(new CategoryService());
 
         await Assert.ThrowsAsync<ArgumentException>(() => svc.ToggleCompleteAsync(Guid.NewGuid()));
     }
@@ -52,7 +52,7 @@ public class QuestServiceTests
     [Fact]
     public async Task GetTodaysQuests_Generates_And_Caches()
     {
-        var svc = new QuestService();
+        var svc = new QuestService(new CategoryService());
 
         var first = (await svc.GetTodaysQuestsAsync()).ToList();
         Assert.InRange(first.Count, 3, 5);
@@ -66,7 +66,7 @@ public class QuestServiceTests
     [Fact]
     public async Task ToggleComplete_Updates_Progress_And_Streak()
     {
-        var svc = new QuestService();
+        var svc = new QuestService(new CategoryService());
 
         var quests = (await svc.GetTodaysQuestsAsync()).ToList();
         Assert.NotEmpty(quests);

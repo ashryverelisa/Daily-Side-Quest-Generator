@@ -3,10 +3,10 @@ using DailySideQuestGenerator.Services.Interfaces;
 
 namespace DailySideQuestGenerator.Services;
 
-public class QuestService : IQuestService
+public class QuestService(ICategoryService categoryService) : IQuestService
 {
-    private readonly List<QuestTemplate> _templates = new();
-    private readonly List<DailyQuest> _generated = new();
+    private readonly List<QuestTemplate> _templates = [];
+    private readonly List<DailyQuest> _generated = [];
     private readonly UserProgress _progress = new();
     private readonly Random _rng = new();
     private bool _initialized = false;
@@ -19,7 +19,7 @@ public class QuestService : IQuestService
         var existing = _generated.Where(q => q.DateGenerated.Date == today).ToList();
         if (existing.Count != 0) return existing;
 
-        var generated = GenerateDailyQuests(today);
+        var generated = await GenerateDailyQuests(today);
         _generated.AddRange(generated);
         return generated;
     }
@@ -90,12 +90,17 @@ public class QuestService : IQuestService
         return Math.Max(1, (int)Math.Floor(Math.Sqrt(totalXp / 10.0)) + 1);
     }
 
-    private List<DailyQuest> GenerateDailyQuests(DateTime forDate)
+    private async Task<List<DailyQuest>> GenerateDailyQuests(DateTime forDate)
     {
         // choose 3-5 quests
         var count = _rng.Next(3, 6);
-        var activeTemplates = _templates.Where(t => t.IsActive).ToList();
+        
+        var enabledCategories = (await categoryService.GetEnabledCategoriesAsync()).ToHashSet();
 
+        var activeTemplates = _templates
+            .Where(t => t.IsActive && enabledCategories.Contains(t.Category))
+            .ToList();
+        
         // Optional: exclude templates used yesterday
         var yesterday = forDate.AddDays(-1);
         var usedYesterdayTemplateIds = _generated

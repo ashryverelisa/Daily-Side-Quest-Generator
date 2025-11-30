@@ -1,10 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
-@using DailySideQuestGenerator.Services.Interfaces
-
-@inject IQuestService QuestService
-
 <div class="app-shell">
     <div class="header">
         <h2>Daily Side-Quests</h2>
@@ -17,6 +13,24 @@
             <span style="margin-left: 12px;"><strong>Total XP:</strong> @_progress?.TotalXP ?? 0</span>
             <span style="margin-left: 12px;"><strong>Streak:</strong> @_progress?.DailyStreak ?? 0</span>
         </div>
+    </div>
+    
+    <div class="card">
+        <h3>Categories (debug view)</h3>
+
+        @if (_categories == null)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            @foreach (var c in _categories)
+            {
+                <span style="margin-right:10px;">
+                    <strong>@c.Name</strong> (@c.Color)
+                </span>
+            }
+        }
     </div>
 
     @if (_quests is null)
