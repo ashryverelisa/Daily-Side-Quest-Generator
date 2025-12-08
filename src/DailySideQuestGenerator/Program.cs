@@ -13,7 +13,6 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IQuestService, QuestService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddTransient<IStorageService, StorageService>();
 
 var app = builder.Build();
 

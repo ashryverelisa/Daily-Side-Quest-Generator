@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using DailySideQuestGenerator.Models;
 using DailySideQuestGenerator.Services.Interfaces;
 using Microsoft.AspNetCore.Components;
@@ -13,17 +14,21 @@ public partial class Home
     private UserProgress? _progress;
     private IReadOnlyList<Category>? _categories;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await QuestService.InitializeIfNeededAsync();
-        await LoadDataAsync();
+        if (firstRender)
+        {
+            await QuestService.InitializeIfNeededAsync();
+            await CategoryService.LoadCategoriesAsync();
+            await LoadDataAsync();    
+        }
     }
 
     private async Task LoadDataAsync()
     {
         _quests = (await QuestService.GetTodaysQuestsAsync()).ToList();
         _progress = await QuestService.GetProgressAsync();
-        _categories = await CategoryService.GetCategoriesAsync();
+        _categories = CategoryService.GetCategoriesAsync();
         StateHasChanged();
     }
 
@@ -31,11 +36,5 @@ public partial class Home
     {
         _progress = await QuestService.GetProgressAsync();
         await LoadDataAsync();
-    }
-    private string GetCategoryColor(string cat)
-    {
-        return _categories?
-                   .FirstOrDefault(c => c.Name == cat)?.Color 
-               ?? "#777";
     }
 }

@@ -15,10 +15,10 @@ public partial class QuestCard
     private string CompleteButtonClass => Quest.IsCompleted ? "complete-btn completed" : "complete-btn";
     private string _categoryColor = "#555";
     private string _categoryName = "Unknown";
-    
-    protected override async Task OnInitializedAsync()
+
+    protected override void OnInitialized()
     {
-        var category = await CategoryService.GetCategoryColorAsync(Quest.Category);
+        var category =  CategoryService.GetCategoryColorAsync(Quest.Category);
         
         if (category != null)
         {
@@ -26,7 +26,7 @@ public partial class QuestCard
             _categoryName = Quest.Category;
         }
     }
-
+    
     private async Task ToggleComplete()
     {
         await QuestService.ToggleCompleteAsync(Quest.Id);

@@ -19,7 +19,7 @@ public class QuestService(ICategoryService categoryService) : IQuestService
         var existing = _generated.Where(q => q.DateGenerated.Date == today).ToList();
         if (existing.Count != 0) return existing;
 
-        var generated = await GenerateDailyQuests(today);
+        var generated = GenerateDailyQuests(today);
         _generated.AddRange(generated);
         return generated;
     }
@@ -40,8 +40,8 @@ public class QuestService(ICategoryService categoryService) : IQuestService
 
         if (q.IsCompleted)
         {
-            _progress.TotalXP += q.XP;
-            _progress.Level = CalculateLevel(_progress.TotalXP);
+            _progress.TotalXp += q.Xp;
+            _progress.Level = CalculateLevel(_progress.TotalXp);
             // naive streak: increment if not already incremented today and at least one completed
             // For Milestone 1 keep it simple: increment streak whenever a quest completed (demo).
             _progress.DailyStreak += 1;
@@ -49,8 +49,8 @@ public class QuestService(ICategoryService categoryService) : IQuestService
         else
         {
             // undo XP on uncheck (simple behavior)
-            _progress.TotalXP = Math.Max(0, _progress.TotalXP - q.XP);
-            _progress.Level = CalculateLevel(_progress.TotalXP);
+            _progress.TotalXp = Math.Max(0, _progress.TotalXp - q.Xp);
+            _progress.Level = CalculateLevel(_progress.TotalXp);
             _progress.DailyStreak = Math.Max(0, _progress.DailyStreak - 1);
         }
 
@@ -72,16 +72,16 @@ public class QuestService(ICategoryService categoryService) : IQuestService
     
     private void SeedTemplates()
     {
-        _templates.Add(new QuestTemplate { Title = "Drink 1L of water", BaseXP = 5, Category = "health", RarityWeight = 1 });
-        _templates.Add(new QuestTemplate { Title = "Clean your desk", BaseXP = 8, Category = "chores", RarityWeight = 2 });
-        _templates.Add(new QuestTemplate { Title = "Watch 1 new anime episode", BaseXP = 3, Category = "fun", RarityWeight = 3 });
-        _templates.Add(new QuestTemplate { Title = "Stretch for 5 minutes", BaseXP = 4, Category = "health", RarityWeight = 1 });
-        _templates.Add(new QuestTemplate { Title = "Read 10 pages of a book", BaseXP = 6, Category = "learning", RarityWeight = 2 });
-        _templates.Add(new QuestTemplate { Title = "Send a message to a friend", BaseXP = 6, Category = "social", RarityWeight = 3 });
-        _templates.Add(new QuestTemplate { Title = "Tidy one shelf", BaseXP = 7, Category = "chores", RarityWeight = 3 });
-        _templates.Add(new QuestTemplate { Title = "Try a 5-minute breathing exercise", BaseXP = 4, Category = "health", RarityWeight = 2 });
-        _templates.Add(new QuestTemplate { Title = "Sketch something for 10 minutes", BaseXP = 5, Category = "creative", RarityWeight = 4 });
-        _templates.Add(new QuestTemplate { Title = "Plan tomorrow for 5 minutes", BaseXP = 4, Category = "productivity", RarityWeight = 2 });
+        _templates.Add(new QuestTemplate { Title = "Drink 1L of water", BaseXp = 5, Category = "health", RarityWeight = 1 });
+        _templates.Add(new QuestTemplate { Title = "Clean your desk", BaseXp = 8, Category = "chores", RarityWeight = 2 });
+        _templates.Add(new QuestTemplate { Title = "Watch 1 new anime episode", BaseXp = 3, Category = "fun", RarityWeight = 3 });
+        _templates.Add(new QuestTemplate { Title = "Stretch for 5 minutes", BaseXp = 4, Category = "health", RarityWeight = 1 });
+        _templates.Add(new QuestTemplate { Title = "Read 10 pages of a book", BaseXp = 6, Category = "learning", RarityWeight = 2 });
+        _templates.Add(new QuestTemplate { Title = "Send a message to a friend", BaseXp = 6, Category = "social", RarityWeight = 3 });
+        _templates.Add(new QuestTemplate { Title = "Tidy one shelf", BaseXp = 7, Category = "chores", RarityWeight = 3 });
+        _templates.Add(new QuestTemplate { Title = "Try a 5-minute breathing exercise", BaseXp = 4, Category = "health", RarityWeight = 2 });
+        _templates.Add(new QuestTemplate { Title = "Sketch something for 10 minutes", BaseXp = 5, Category = "creative", RarityWeight = 4 });
+        _templates.Add(new QuestTemplate { Title = "Plan tomorrow for 5 minutes", BaseXp = 4, Category = "productivity", RarityWeight = 2 });
     }
     
     private int CalculateLevel(int totalXp)
@@ -90,12 +90,12 @@ public class QuestService(ICategoryService categoryService) : IQuestService
         return Math.Max(1, (int)Math.Floor(Math.Sqrt(totalXp / 10.0)) + 1);
     }
 
-    private async Task<List<DailyQuest>> GenerateDailyQuests(DateTime forDate)
+    private List<DailyQuest> GenerateDailyQuests(DateTime forDate)
     {
         // choose 3-5 quests
         var count = _rng.Next(3, 6);
         
-        var enabledCategories = (await categoryService.GetEnabledCategoriesAsync()).ToHashSet();
+        var enabledCategories = ( categoryService.GetEnabledCategoriesAsync()).ToHashSet();
 
         var activeTemplates = _templates
             .Where(t => t.IsActive && enabledCategories.Contains(t.Category))
@@ -130,7 +130,7 @@ public class QuestService(ICategoryService categoryService) : IQuestService
                 DateGenerated = forDate,
                 TemplateId = chosen.Id,
                 Title = chosen.Title,
-                XP = chosen.BaseXP,
+                Xp = chosen.BaseXp,
                 Category = chosen.Category,
                 IsCompleted = false
             });
@@ -146,7 +146,7 @@ public class QuestService(ICategoryService categoryService) : IQuestService
                 DateGenerated = forDate,
                 TemplateId = r.Id,
                 Title = r.Title,
-                XP = r.BaseXP,
+                Xp = r.BaseXp,
                 Category = r.Category
             }));
         }
