@@ -5,7 +5,6 @@ namespace DailySideQuestGenerator.Services;
 
 public class QuestService(ICategoryService categoryService, IQuestTemplateService questTemplateService, IUserProgressService userProgressService) : IQuestService
 {
-    public UserProgress UserProgress { get; set; } = userProgressService.GetUserProgress();
     private List<QuestTemplate> _templates = [];
     private readonly List<DailyQuest> _generated = [];
     private readonly Random _rng = new();
@@ -36,18 +35,13 @@ public class QuestService(ICategoryService categoryService, IQuestTemplateServic
 
         if (q.IsCompleted)
         {
-            UserProgress.TotalXp += q.Xp;
-            UserProgress.Level = CalculateLevel(UserProgress.TotalXp);
-            // naive streak: increment if not already incremented today and at least one completed
-            // For Milestone 1 keep it simple: increment streak whenever a quest completed (demo).
-            UserProgress.DailyStreak += 1;
+            await userProgressService.AddXpAsync(q.Xp);
+            await userProgressService.UpdateStreakAsync();
         }
         else
         {
-            // undo XP on uncheck (simple behavior)
-            UserProgress.TotalXp = Math.Max(0, UserProgress.TotalXp - q.Xp);
-            UserProgress.Level = CalculateLevel(UserProgress.TotalXp);
-            UserProgress.DailyStreak = Math.Max(0, UserProgress.DailyStreak - 1);
+            await userProgressService.RemoveXpAsync(q.Xp);
+            await userProgressService.DecrementStreakAsync();
         }
 
         return q;
@@ -56,17 +50,12 @@ public class QuestService(ICategoryService categoryService, IQuestTemplateServic
     public async Task InitializeIfNeededAsync()
     {
         if (_initialized) return;
-        await userProgressService.LoadUserProgressAsync();   
+        await userProgressService.LoadAsync();   
         await questTemplateService.LoadQuestTemplatesAsync();
         _templates = questTemplateService.GetQuestTemplates();
         _initialized = true;
     }
 
-    private int CalculateLevel(int totalXp)
-    {
-        // Example formula: level grows roughly as sqrt(totalXp/10)
-        return Math.Max(1, (int)Math.Floor(Math.Sqrt(totalXp / 10.0)) + 1);
-    }
 
     private List<DailyQuest> GenerateDailyQuests(DateTime forDate)
     {

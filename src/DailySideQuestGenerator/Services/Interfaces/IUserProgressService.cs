@@ -4,6 +4,13 @@ namespace DailySideQuestGenerator.Services.Interfaces;
 
 public interface IUserProgressService
 {
-    Task LoadUserProgressAsync();
-    UserProgress GetUserProgress();
+    UserProgress Progress { get; }
+    
+    Task LoadAsync();
+    Task SaveAsync();
+    
+    Task AddXpAsync(int xp);
+    Task RemoveXpAsync(int xp);
+    Task UpdateStreakAsync();
+    Task DecrementStreakAsync();
 }

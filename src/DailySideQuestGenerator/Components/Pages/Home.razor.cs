@@ -8,6 +8,7 @@ public partial class Home
 {
     [Inject] private IQuestService QuestService { get; set; } = null!;
     [Inject] private ICategoryService CategoryService { get; set; } = null!;
+    [Inject] private IUserProgressService UserProgressService { get; set; } = null!;
     
     private List<DailyQuest>? _quests;
     private IReadOnlyList<Category>? _categories;

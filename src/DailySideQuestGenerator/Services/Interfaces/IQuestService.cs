@@ -24,6 +24,4 @@ public interface IQuestService
     /// Should be called before generating or retrieving quests to ensure templates are available.
     /// </summary>
     Task InitializeIfNeededAsync();
-    
-    UserProgress UserProgress { get; set; }
 }

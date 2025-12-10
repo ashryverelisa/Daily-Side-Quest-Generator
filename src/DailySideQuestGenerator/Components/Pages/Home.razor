@@ -9,28 +9,10 @@
     <div class="card">
         <h3>Progress</h3>
         <div>
-            <strong>Level:</strong> @QuestService.UserProgress?.Level
-            <span style="margin-left: 12px;"><strong>Total XP:</strong> @QuestService.UserProgress?.TotalXp</span>
-            <span style="margin-left: 12px;"><strong>Streak:</strong> @QuestService.UserProgress?.DailyStreak</span>
+            <strong>Level:</strong> @UserProgressService.Progress.Level
+            <span style="margin-left: 12px;"><strong>Total XP:</strong> @UserProgressService.Progress.TotalXp</span>
+            <span style="margin-left: 12px;"><strong>Streak:</strong> @UserProgressService.Progress.DailyStreak</span>
         </div>
-    </div>
-    
-    <div class="card">
-        <h3>Categories (debug view)</h3>
-
-        @if (_categories == null)
-        {
-            <p>Loading...</p>
-        }
-        else
-        {
-            @foreach (var c in _categories)
-            {
-                <span style="margin-right:10px;">
-                    <strong>@c.Name</strong> (@c.Color)
-                </span>
-            }
-        }
     </div>
 
     @if (_quests is null)
