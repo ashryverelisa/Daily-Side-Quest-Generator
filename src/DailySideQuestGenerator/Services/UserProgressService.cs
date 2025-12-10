@@ -46,11 +46,17 @@ public class UserProgressService(ILocalStorageService localStorageService) : IUs
         var today = DateTime.UtcNow.Date;
         var lastCompleted = Progress.LastQuestCompleted.Date;
 
+        // Only update streak and timestamp on the first quest completed today
+        if (lastCompleted == today)
+        {
+            return;
+        }
+
         if (lastCompleted == today.AddDays(-1))
         {
             Progress.DailyStreak++;
         }
-        else if (lastCompleted != today)
+        else
         {
             Progress.DailyStreak = 1;
         }
