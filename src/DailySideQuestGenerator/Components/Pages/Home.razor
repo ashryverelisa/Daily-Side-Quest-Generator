@@ -9,9 +9,9 @@
     <div class="card">
         <h3>Progress</h3>
         <div>
-            <strong>Level:</strong> @_progress?.Level ?? 1
-            <span style="margin-left: 12px;"><strong>Total XP:</strong> @_progress?.TotalXp ?? 0</span>
-            <span style="margin-left: 12px;"><strong>Streak:</strong> @_progress?.DailyStreak ?? 0</span>
+            <strong>Level:</strong> @QuestService.UserProgress?.Level
+            <span style="margin-left: 12px;"><strong>Total XP:</strong> @QuestService.UserProgress?.TotalXp</span>
+            <span style="margin-left: 12px;"><strong>Streak:</strong> @QuestService.UserProgress?.DailyStreak</span>
         </div>
     </div>
     

@@ -24,10 +24,6 @@ public interface IQuestService
     /// Should be called before generating or retrieving quests to ensure templates are available.
     /// </summary>
     Task InitializeIfNeededAsync();
-
-    /// <summary>
-    /// Retrieves the current progress of the user, including total XP, level, and daily streak.
-    /// </summary>
-    /// <returns>A <see cref="UserProgress"/> object representing the user's current progress.</returns>
-    Task<UserProgress> GetProgressAsync();
+    
+    UserProgress UserProgress { get; set; }
 }

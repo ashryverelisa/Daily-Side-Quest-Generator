@@ -3,13 +3,13 @@ using DailySideQuestGenerator.Services.Interfaces;
 
 namespace DailySideQuestGenerator.Services;
 
-public class QuestService(ICategoryService categoryService, IQuestTemplateService questTemplateService) : IQuestService
+public class QuestService(ICategoryService categoryService, IQuestTemplateService questTemplateService, IUserProgressService userProgressService) : IQuestService
 {
+    public UserProgress UserProgress { get; set; } = userProgressService.GetUserProgress();
     private List<QuestTemplate> _templates = [];
     private readonly List<DailyQuest> _generated = [];
-    private readonly UserProgress _progress = new();
     private readonly Random _rng = new();
-    private bool _initialized = false;
+    private bool _initialized;
 
     public async Task<IReadOnlyList<DailyQuest>> GetTodaysQuestsAsync()
     {
@@ -36,18 +36,18 @@ public class QuestService(ICategoryService categoryService, IQuestTemplateServic
 
         if (q.IsCompleted)
         {
-            _progress.TotalXp += q.Xp;
-            _progress.Level = CalculateLevel(_progress.TotalXp);
+            UserProgress.TotalXp += q.Xp;
+            UserProgress.Level = CalculateLevel(UserProgress.TotalXp);
             // naive streak: increment if not already incremented today and at least one completed
             // For Milestone 1 keep it simple: increment streak whenever a quest completed (demo).
-            _progress.DailyStreak += 1;
+            UserProgress.DailyStreak += 1;
         }
         else
         {
             // undo XP on uncheck (simple behavior)
-            _progress.TotalXp = Math.Max(0, _progress.TotalXp - q.Xp);
-            _progress.Level = CalculateLevel(_progress.TotalXp);
-            _progress.DailyStreak = Math.Max(0, _progress.DailyStreak - 1);
+            UserProgress.TotalXp = Math.Max(0, UserProgress.TotalXp - q.Xp);
+            UserProgress.Level = CalculateLevel(UserProgress.TotalXp);
+            UserProgress.DailyStreak = Math.Max(0, UserProgress.DailyStreak - 1);
         }
 
         return q;
@@ -56,16 +56,12 @@ public class QuestService(ICategoryService categoryService, IQuestTemplateServic
     public async Task InitializeIfNeededAsync()
     {
         if (_initialized) return;
+        await userProgressService.LoadUserProgressAsync();   
         await questTemplateService.LoadQuestTemplatesAsync();
-        _initialized = true;
         _templates = questTemplateService.GetQuestTemplates();
+        _initialized = true;
     }
 
-    public Task<UserProgress> GetProgressAsync()
-    {
-        return Task.FromResult(_progress);
-    }
-    
     private int CalculateLevel(int totalXp)
     {
         // Example formula: level grows roughly as sqrt(totalXp/10)

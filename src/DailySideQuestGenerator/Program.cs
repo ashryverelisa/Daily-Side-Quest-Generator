@@ -12,6 +12,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IQuestService, QuestService>();
+builder.Services.AddScoped<IUserProgressService, UserProgressService>();
 builder.Services.AddScoped<IQuestTemplateService, QuestTemplateService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 
