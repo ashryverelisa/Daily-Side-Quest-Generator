@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using DailySideQuestGenerator.Components;
 using DailySideQuestGenerator.Services;
 using DailySideQuestGenerator.Services.Interfaces;
@@ -7,7 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddRazorPages();
+builder.Services.AddBlazoredLocalStorage();
+
 builder.Services.AddScoped<IQuestService, QuestService>();
+builder.Services.AddScoped<IDailyQuestService, DailyQuestService>();
+builder.Services.AddScoped<IUserProgressService, UserProgressService>();
+builder.Services.AddScoped<IQuestTemplateService, QuestTemplateService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 var app = builder.Build();
 

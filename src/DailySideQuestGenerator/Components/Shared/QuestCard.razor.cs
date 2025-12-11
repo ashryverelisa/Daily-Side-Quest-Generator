@@ -9,10 +9,24 @@ public partial class QuestCard
     [Parameter] public DailyQuest Quest { get; set; } = null!;
     [Parameter] public EventCallback OnToggled { get; set; }
     [Inject] private IQuestService QuestService { get; set; } = null!;
+    [Inject] private ICategoryService CategoryService { get; set; } = null!;
 
     private string ButtonText => Quest.IsCompleted ? "Completed" : "Complete";
     private string CompleteButtonClass => Quest.IsCompleted ? "complete-btn completed" : "complete-btn";
+    private string _categoryColor = "#555";
+    private string _categoryName = "Unknown";
 
+    protected override void OnInitialized()
+    {
+        var category =  CategoryService.GetCategoryColorAsync(Quest.Category);
+        
+        if (category != null)
+        {
+            _categoryColor = category;
+            _categoryName = Quest.Category;
+        }
+    }
+    
     private async Task ToggleComplete()
     {
         await QuestService.ToggleCompleteAsync(Quest.Id);

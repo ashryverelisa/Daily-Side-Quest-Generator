@@ -12,13 +12,6 @@ public interface IQuestService
     Task<IReadOnlyList<DailyQuest>> GetTodaysQuestsAsync();
 
     /// <summary>
-    /// Retrieves all available quest templates in the system.
-    /// These templates serve as the pool for daily quest generation.
-    /// </summary>
-    /// <returns>A read-only list of <see cref="QuestTemplate"/> objects.</returns>
-    Task<IReadOnlyList<QuestTemplate>> GetAllTemplatesAsync();
-
-    /// <summary>
     /// Toggles the completion state of a specific daily quest.
     /// If the quest is marked as completed, XP and streak will be updated accordingly.
     /// </summary>
@@ -31,10 +24,4 @@ public interface IQuestService
     /// Should be called before generating or retrieving quests to ensure templates are available.
     /// </summary>
     Task InitializeIfNeededAsync();
-
-    /// <summary>
-    /// Retrieves the current progress of the user, including total XP, level, and daily streak.
-    /// </summary>
-    /// <returns>A <see cref="UserProgress"/> object representing the user's current progress.</returns>
-    Task<UserProgress> GetProgressAsync();
 }

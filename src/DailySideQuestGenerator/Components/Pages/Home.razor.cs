@@ -1,29 +1,37 @@
 using DailySideQuestGenerator.Models;
+using DailySideQuestGenerator.Services.Interfaces;
+using Microsoft.AspNetCore.Components;
 
 namespace DailySideQuestGenerator.Components.Pages;
 
 public partial class Home
 {
+    [Inject] private IQuestService QuestService { get; set; } = null!;
+    [Inject] private ICategoryService CategoryService { get; set; } = null!;
+    [Inject] private IUserProgressService UserProgressService { get; set; } = null!;
+    
     private List<DailyQuest>? _quests;
-    private UserProgress? _progress;
+    private IReadOnlyList<Category>? _categories;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await QuestService.InitializeIfNeededAsync();
-        await LoadDataAsync();
+        if (firstRender)
+        {
+            await QuestService.InitializeIfNeededAsync();
+            await CategoryService.LoadCategoriesAsync();
+            await LoadDataAsync();    
+        }
     }
 
     private async Task LoadDataAsync()
     {
-        var readOnlyQuests = await QuestService.GetTodaysQuestsAsync();
-        _quests = readOnlyQuests.ToList();
-        _progress = await QuestService.GetProgressAsync();
+        _quests = (await QuestService.GetTodaysQuestsAsync()).ToList();
+        _categories = CategoryService.GetCategoriesAsync();
         StateHasChanged();
     }
 
     private async Task OnToggled()
     {
-        _progress = await QuestService.GetProgressAsync();
         await LoadDataAsync();
     }
 }

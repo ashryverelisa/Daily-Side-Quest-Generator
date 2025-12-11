@@ -1,90 +1,325 @@
+using DailySideQuestGenerator.Models;
 using DailySideQuestGenerator.Services;
+using DailySideQuestGenerator.Services.Interfaces;
+using NSubstitute;
 
 namespace DailySideQuestGenerator.Tests.Services;
 
 public class QuestServiceTests
 {
-    [Fact]
-    public async Task Initialize_Populates_Templates()
+    private readonly IQuestTemplateService _questTemplateService;
+    private readonly IUserProgressService _userProgressService;
+    private readonly IDailyQuestService _dailyQuestService;
+    private readonly QuestService _questService;
+
+    public QuestServiceTests()
     {
-        var svc = new QuestService();
+        _questTemplateService = Substitute.For<IQuestTemplateService>();
+        _userProgressService = Substitute.For<IUserProgressService>();
+        _dailyQuestService = Substitute.For<IDailyQuestService>();
+        _questService = new QuestService(_questTemplateService, _userProgressService, _dailyQuestService);
+    }
+    
+    [Fact]
+    public async Task InitializeIfNeededAsync_LoadsAllServices()
+    {
+        // Act
+        await _questService.InitializeIfNeededAsync();
 
-        await svc.InitializeIfNeededAsync();
-        var templates = await svc.GetAllTemplatesAsync();
-
-        Assert.NotNull(templates);
-        Assert.Equal(10, templates.Count); // seeded templates count
+        // Assert
+        await _userProgressService.Received(1).LoadAsync();
+        await _questTemplateService.Received(1).LoadQuestTemplatesAsync();
+        await _dailyQuestService.Received(1).LoadAsync();
     }
 
     [Fact]
-    public async Task Initialize_Called_Twice_Does_Not_Duplicate_Templates()
+    public async Task InitializeIfNeededAsync_WhenCalledTwice_OnlyInitializesOnce()
     {
-        var svc = new QuestService();
+        // Act
+        await _questService.InitializeIfNeededAsync();
+        await _questService.InitializeIfNeededAsync();
 
-        await svc.InitializeIfNeededAsync();
-        await svc.InitializeIfNeededAsync();
-
-        var templates = await svc.GetAllTemplatesAsync();
-        Assert.Equal(10, templates.Count);
+        // Assert
+        await _userProgressService.Received(1).LoadAsync();
+        await _questTemplateService.Received(1).LoadQuestTemplatesAsync();
+        await _dailyQuestService.Received(1).LoadAsync();
     }
 
     [Fact]
-    public async Task GetProgressAsync_Returns_Zeroed_State_Before_Completion()
+    public async Task GetTodayQuestsAsync_InitializesBeforeReturning()
     {
-        var svc = new QuestService();
+        // Arrange
+        _dailyQuestService.DailyQuests.Returns([]);
 
-        await svc.InitializeIfNeededAsync();
-        var progress = await svc.GetProgressAsync();
+        // Act
+        await _questService.GetTodaysQuestsAsync();
 
-        Assert.Equal(0, progress.TotalXP);
-        Assert.Equal(1, progress.Level);
-        Assert.Equal(0, progress.DailyStreak);
+        // Assert
+        await _userProgressService.Received(1).LoadAsync();
+        await _questTemplateService.Received(1).LoadQuestTemplatesAsync();
+        await _dailyQuestService.Received(1).LoadAsync();
     }
 
     [Fact]
-    public async Task ToggleComplete_InvalidQuest_Throws()
+    public async Task GetTodayQuestsAsync_ReturnsDailyQuestsFromService()
     {
-        var svc = new QuestService();
+        // Arrange
+        var quests = new List<DailyQuest>
+        {
+            new() { Id = Guid.NewGuid(), Title = "Quest 1", DateGenerated = DateTime.UtcNow },
+            new() { Id = Guid.NewGuid(), Title = "Quest 2", DateGenerated = DateTime.UtcNow }
+        };
+        _dailyQuestService.DailyQuests.Returns(quests);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => svc.ToggleCompleteAsync(Guid.NewGuid()));
+        // Act
+        var result = await _questService.GetTodaysQuestsAsync();
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, q => q.Title == "Quest 1");
+        Assert.Contains(result, q => q.Title == "Quest 2");
     }
 
     [Fact]
-    public async Task GetTodaysQuests_Generates_And_Caches()
+    public async Task GetTodayQuestsAsync_WhenCalledTwice_ReturnsCachedQuests()
     {
-        var svc = new QuestService();
+        // Arrange
+        var quests = new List<DailyQuest>
+        {
+            new() { Id = Guid.NewGuid(), Title = "Quest 1", DateGenerated = DateTime.UtcNow }
+        };
+        _dailyQuestService.DailyQuests.Returns(quests);
 
-        var first = (await svc.GetTodaysQuestsAsync()).ToList();
-        Assert.InRange(first.Count, 3, 5);
+        // Act
+        var result1 = await _questService.GetTodaysQuestsAsync();
+        var result2 = await _questService.GetTodaysQuestsAsync();
 
-        var second = (await svc.GetTodaysQuestsAsync()).ToList();
-        Assert.Equal(first.Count, second.Count);
-
-        Assert.True(first.Select(f => f.TemplateId).SequenceEqual(second.Select(s => s.TemplateId)));
+        // Assert
+        Assert.Same(result1[0], result2[0]);
     }
 
     [Fact]
-    public async Task ToggleComplete_Updates_Progress_And_Streak()
+    public async Task GetTodayQuestsAsync_ReturnsReadOnlyList()
     {
-        var svc = new QuestService();
+        // Arrange
+        var quests = new List<DailyQuest>
+        {
+            new() { Id = Guid.NewGuid(), Title = "Quest 1", DateGenerated = DateTime.UtcNow }
+        };
+        _dailyQuestService.DailyQuests.Returns(quests);
 
-        var quests = (await svc.GetTodaysQuestsAsync()).ToList();
-        Assert.NotEmpty(quests);
+        // Act
+        var result = await _questService.GetTodaysQuestsAsync();
 
-        var q = quests.First();
+        // Assert
+        Assert.IsAssignableFrom<IReadOnlyList<DailyQuest>>(result);
+    }
 
-        var completed = await svc.ToggleCompleteAsync(q.Id);
-        Assert.True(completed.IsCompleted);
+    [Fact]
+    public async Task GetTodayQuestsAsync_WhenNoQuests_ReturnsEmptyList()
+    {
+        // Arrange
+        _dailyQuestService.DailyQuests.Returns([]);
 
-        var progressAfterComplete = await svc.GetProgressAsync();
-        Assert.Equal(q.XP, progressAfterComplete.TotalXP);
-        Assert.Equal(1, progressAfterComplete.DailyStreak);
+        // Act
+        var result = await _questService.GetTodaysQuestsAsync();
 
-        var undone = await svc.ToggleCompleteAsync(q.Id);
-        Assert.False(undone.IsCompleted);
+        // Assert
+        Assert.Empty(result);
+    }
+    
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenQuestNotCompleted_MarksAsCompleted()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync(); // Initialize and cache the quest
 
-        var progressAfterUndo = await svc.GetProgressAsync();
-        Assert.Equal(0, progressAfterUndo.TotalXP);
-        Assert.Equal(0, progressAfterUndo.DailyStreak);
+        // Act
+        var result = await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        Assert.True(result.IsCompleted);
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenQuestCompleted_MarksAsNotCompleted()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = true, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        var result = await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        Assert.False(result.IsCompleted);
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenCompleting_AddsXp()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 15, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _userProgressService.Received(1).AddXpAsync(15);
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenCompleting_UpdatesStreak()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _userProgressService.Received(1).UpdateStreakAsync();
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenUncompleted_RemovesXp()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 20, IsCompleted = true, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _userProgressService.Received(1).RemoveXpAsync(20);
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenUncompleted_DecrementsStreak()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = true, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _userProgressService.Received(1).DecrementStreakAsync();
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_SavesAfterToggle()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _dailyQuestService.Received(1).SaveAsync();
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenQuestNotFound_ThrowsArgumentException()
+    {
+        // Arrange
+        var nonExistentId = Guid.NewGuid();
+        _dailyQuestService.DailyQuests.Returns([]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _questService.ToggleCompleteAsync(nonExistentId));
+        Assert.Equal("Quest not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_ReturnsUpdatedQuest()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        var result = await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        Assert.Equal(questId, result.Id);
+        Assert.Equal("Test Quest", result.Title);
+        Assert.Equal(10, result.Xp);
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_InitializesIfNeeded()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+
+        // Act - call toggle directly without calling GetTodaysQuestsAsync first
+        // This will initialize and then fail because quest won't be in _generated yet
+        await Assert.ThrowsAsync<ArgumentException>(() => _questService.ToggleCompleteAsync(questId));
+
+        // Assert - initialization should still have happened
+        await _userProgressService.Received(1).LoadAsync();
+        await _questTemplateService.Received(1).LoadQuestTemplatesAsync();
+        await _dailyQuestService.Received(1).LoadAsync();
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenCompletingDoesNotCallRemoveXp()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _userProgressService.DidNotReceive().RemoveXpAsync(Arg.Any<int>());
+        await _userProgressService.DidNotReceive().DecrementStreakAsync();
+    }
+
+    [Fact]
+    public async Task ToggleCompleteAsync_WhenUncompletedDoesNotCallAddXp()
+    {
+        // Arrange
+        var questId = Guid.NewGuid();
+        var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = true, DateGenerated = DateTime.UtcNow };
+        _dailyQuestService.DailyQuests.Returns([quest]);
+        await _questService.GetTodaysQuestsAsync();
+
+        // Act
+        await _questService.ToggleCompleteAsync(questId);
+
+        // Assert
+        await _userProgressService.DidNotReceive().AddXpAsync(Arg.Any<int>());
+        await _userProgressService.DidNotReceive().UpdateStreakAsync();
     }
 }

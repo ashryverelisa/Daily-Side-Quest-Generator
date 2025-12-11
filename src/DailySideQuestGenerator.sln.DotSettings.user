@@ -1,7 +1,0 @@
-﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/dotCover/Editor/HighlightingSourceSnapshotLocation/@EntryValue">/home/elisa/.cache/JetBrains/Rider2025.3/resharper-host/temp/Rider/vAny/CoverageData/_DailySideQuestGenerator.-1737058131/Snapshot/snapshot.utdcvr</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fb9e676a_002Dd74e_002D4280_002Dadb9_002D66ee4642e721/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Initialize_Populates_Templates" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::21051734-2E02-4A93-828B-784DDC339A58::net10.0::DailySideQuestGenerator.Tests.Services.QuestServiceTests&lt;/TestId&gt;
-  &lt;/TestAncestor&gt;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
