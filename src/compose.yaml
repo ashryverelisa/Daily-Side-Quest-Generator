@@ -1,0 +1,10 @@
+﻿services:
+  quest-generator:
+    image: dailysidequestgenerator
+    build:
+      context: .
+      dockerfile: DailySideQuestGenerator/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
