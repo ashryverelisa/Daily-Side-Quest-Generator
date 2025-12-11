@@ -87,3 +87,18 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.manage-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(59, 130, 246, 0.1);
+    transition: all 0.2s ease;
+}
+
+.manage-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    text-decoration: none;
+}

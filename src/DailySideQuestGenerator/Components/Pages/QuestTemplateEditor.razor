@@ -1,0 +1,155 @@
+@page "/quest-templates"
+@rendermode InteractiveServer
+
+<div class="app-shell">
+    <div class="header">
+        <h2>Quest Template Editor</h2>
+        <a href="/" class="back-link">← Back to Quests</a>
+    </div>
+    
+    <div class="card editor-section">
+        <h3>@(_isEditing ? "Edit Quest Template" : "Create New Quest Template")</h3>
+        <EditForm Model="_formModel" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <InputText id="title" @bind-Value="_formModel.Title" class="form-input" placeholder="Enter quest title..." />
+                <ValidationMessage For="@(() => _formModel.Title)" class="validation-error" />
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <InputTextArea id="description" @bind-Value="_formModel.Description" class="form-input" rows="2" placeholder="Optional description..." />
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="baseXp">Base XP (1-100) *</label>
+                    <InputNumber id="baseXp" @bind-Value="_formModel.BaseXp" class="form-input" />
+                    <ValidationMessage For="@(() => _formModel.BaseXp)" class="validation-error" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="rarityWeight">Rarity Weight (1-5) *</label>
+                    <InputNumber id="rarityWeight" @bind-Value="_formModel.RarityWeight" class="form-input" />
+                    <ValidationMessage For="@(() => _formModel.RarityWeight)" class="validation-error" />
+                    <small class="help-text">Higher = more common</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <InputSelect id="category" @bind-Value="_formModel.Category" class="form-input">
+                    @foreach (var category in _categories)
+                    {
+                        <option value="@category.Name">@category.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => _formModel.Category)" class="validation-error" />
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <label>
+                    <InputCheckbox @bind-Value="_formModel.IsActive" />
+                    Active (will appear in daily quest pool)
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    @(_isEditing ? "Update Template" : "Create Template")
+                </button>
+                @if (_isEditing)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                }
+            </div>
+        </EditForm>
+    </div>
+    
+    <div class="card template-list-section">
+        <h3>Existing Quest Templates</h3>
+        
+        @if (_templates is null)
+        {
+            <p>Loading templates...</p>
+        }
+        else if (!_templates.Any())
+        {
+            <p class="empty-state">No quest templates yet. Create one above!</p>
+        }
+        else
+        {
+            <div class="filter-bar">
+                <input type="text" @bind="_searchTerm" @bind:event="oninput" placeholder="Search templates..." class="form-input search-input" />
+                <select @bind="_filterCategory" class="form-input filter-select">
+                    <option value="">All Categories</option>
+                    @foreach (var category in _categories)
+                    {
+                        <option value="@category.Name">@category.Name</option>
+                    }
+                </select>
+                <select @bind="_filterStatus" class="form-input filter-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active Only</option>
+                    <option value="inactive">Inactive Only</option>
+                </select>
+            </div>
+            
+            <div class="template-list">
+                @foreach (var template in FilteredTemplates)
+                {
+                    <div class="template-item @(template.IsActive ? "" : "inactive")">
+                        <div class="template-info">
+                            <div class="template-title">
+                                @template.Title
+                                @if (!template.IsActive)
+                                {
+                                    <span class="status-badge inactive-badge">Inactive</span>
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(template.Description))
+                            {
+                                <div class="template-description">@template.Description</div>
+                            }
+                            <div class="template-meta">
+                                <span class="category-badge" style="background-color: @GetCategoryColor(template.Category)">@template.Category</span>
+                                <span class="xp-badge">@template.BaseXp XP</span>
+                                <span class="rarity-badge">Rarity: @template.RarityWeight</span>
+                            </div>
+                        </div>
+                        <div class="template-actions">
+                            <button class="btn btn-small btn-edit" @onclick="() => StartEdit(template)" title="Edit">
+                                ✏️
+                            </button>
+                            <button class="btn btn-small @(template.IsActive ? "btn-deactivate" : "btn-activate")" 
+                                    @onclick="() => ToggleActive(template.Id)" 
+                                    title="@(template.IsActive ? "Deactivate" : "Activate")">
+                                @(template.IsActive ? "🔴" : "🟢")
+                            </button>
+                            <button class="btn btn-small btn-delete" @onclick="() => ConfirmDelete(template)" title="Delete">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    
+    @if (_showDeleteConfirm)
+    {
+        <div class="modal-overlay" @onclick="CancelDelete">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <h3>Confirm Delete</h3>
+                <p>Are you sure you want to delete "<strong>@_templateToDelete?.Title</strong>"?</p>
+                <p class="warning-text">This action cannot be undone.</p>
+                <div class="modal-actions">
+                    <button class="btn btn-danger" @onclick="ExecuteDelete">Delete</button>
+                    <button class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
