@@ -42,6 +42,8 @@ public class QuestService(IQuestTemplateService questTemplateService, IUserProgr
             await userProgressService.DecrementStreakAsync();
         }
 
+        await dailyQuestService.SaveAsync();
+        
         return q;
     }
 
