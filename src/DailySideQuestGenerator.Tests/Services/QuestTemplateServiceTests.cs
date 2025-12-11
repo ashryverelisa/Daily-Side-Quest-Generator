@@ -240,4 +240,331 @@ public class QuestTemplateServiceTests
         Assert.Contains("creative", categories);
         Assert.Contains("productivity", categories);
     }
+
+    [Fact]
+    public async Task GetQuestTemplateById_WhenExists_ReturnsTemplate()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "Test Quest", BaseXp = 10, Category = "test" }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+
+        // Act
+        var result = _questTemplateService.GetQuestTemplateById(templateId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Test Quest", result.Title);
+    }
+
+    [Fact]
+    public async Task GetQuestTemplateById_WhenNotExists_ReturnsNull()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+
+        // Act
+        var result = _questTemplateService.GetQuestTemplateById(Guid.NewGuid());
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task AddQuestTemplateAsync_AddsTemplateToList()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        var initialCount = _questTemplateService.GetQuestTemplates().Count;
+        var newTemplate = new QuestTemplate { Title = "New Quest", BaseXp = 15, Category = "new" };
+
+        // Act
+        await _questTemplateService.AddQuestTemplateAsync(newTemplate);
+
+        // Assert
+        var templates = _questTemplateService.GetQuestTemplates();
+        Assert.Equal(initialCount + 1, templates.Count);
+        Assert.Contains(templates, t => t.Title == "New Quest");
+    }
+
+    [Fact]
+    public async Task AddQuestTemplateAsync_AssignsNewGuid()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        var newTemplate = new QuestTemplate { Id = Guid.Empty, Title = "New Quest", BaseXp = 15, Category = "new" };
+
+        // Act
+        await _questTemplateService.AddQuestTemplateAsync(newTemplate);
+
+        // Assert
+        var addedTemplate = _questTemplateService.GetQuestTemplates().First(t => t.Title == "New Quest");
+        Assert.NotEqual(Guid.Empty, addedTemplate.Id);
+    }
+
+    [Fact]
+    public async Task AddQuestTemplateAsync_PersistsToStorage()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        _localStorageService.ClearReceivedCalls();
+        var newTemplate = new QuestTemplate { Title = "New Quest", BaseXp = 15, Category = "new" };
+
+        // Act
+        await _questTemplateService.AddQuestTemplateAsync(newTemplate);
+
+        // Assert
+        await _localStorageService.Received(1).SetItemAsync(
+            "questTemplates",
+            Arg.Is<List<QuestTemplate>>(list => list.Any(t => t.Title == "New Quest")));
+    }
+    
+    [Fact]
+    public async Task UpdateQuestTemplateAsync_UpdatesExistingTemplate()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "Original Title", BaseXp = 10, Category = "test" }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+
+        var updatedTemplate = new QuestTemplate
+        {
+            Id = templateId,
+            Title = "Updated Title",
+            Description = "New Description",
+            BaseXp = 20,
+            Category = "updated",
+            RarityWeight = 3,
+            IsActive = false
+        };
+
+        // Act
+        await _questTemplateService.UpdateQuestTemplateAsync(updatedTemplate);
+
+        // Assert
+        var template = _questTemplateService.GetQuestTemplateById(templateId);
+        Assert.NotNull(template);
+        Assert.Equal("Updated Title", template.Title);
+        Assert.Equal("New Description", template.Description);
+        Assert.Equal(20, template.BaseXp);
+        Assert.Equal("updated", template.Category);
+        Assert.Equal(3, template.RarityWeight);
+        Assert.False(template.IsActive);
+    }
+
+    [Fact]
+    public async Task UpdateQuestTemplateAsync_WhenNotExists_DoesNothing()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        var initialCount = _questTemplateService.GetQuestTemplates().Count;
+        _localStorageService.ClearReceivedCalls();
+
+        var nonExistentTemplate = new QuestTemplate
+        {
+            Id = Guid.NewGuid(),
+            Title = "Non-existent",
+            BaseXp = 10,
+            Category = "test"
+        };
+
+        // Act
+        await _questTemplateService.UpdateQuestTemplateAsync(nonExistentTemplate);
+
+        // Assert
+        Assert.Equal(initialCount, _questTemplateService.GetQuestTemplates().Count);
+        await _localStorageService.DidNotReceive().SetItemAsync(
+            Arg.Any<string>(),
+            Arg.Any<List<QuestTemplate>>());
+    }
+
+    [Fact]
+    public async Task UpdateQuestTemplateAsync_PersistsToStorage()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "Original Title", BaseXp = 10, Category = "test" }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        _localStorageService.ClearReceivedCalls();
+
+        var updatedTemplate = new QuestTemplate { Id = templateId, Title = "Updated Title", BaseXp = 20, Category = "test" };
+
+        // Act
+        await _questTemplateService.UpdateQuestTemplateAsync(updatedTemplate);
+
+        // Assert
+        await _localStorageService.Received(1).SetItemAsync(
+            "questTemplates",
+            Arg.Is<List<QuestTemplate>>(list => list.Any(t => t.Title == "Updated Title")));
+    }
+    
+    [Fact]
+    public async Task DeleteQuestTemplateAsync_RemovesTemplateFromList()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "To Delete", BaseXp = 10, Category = "test" },
+            new() { Id = Guid.NewGuid(), Title = "Keep This", BaseXp = 15, Category = "test" }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+
+        // Act
+        await _questTemplateService.DeleteQuestTemplateAsync(templateId);
+
+        // Assert
+        var templates = _questTemplateService.GetQuestTemplates();
+        Assert.Single(templates);
+        Assert.DoesNotContain(templates, t => t.Title == "To Delete");
+        Assert.Contains(templates, t => t.Title == "Keep This");
+    }
+
+    [Fact]
+    public async Task DeleteQuestTemplateAsync_WhenNotExists_DoesNothing()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        var initialCount = _questTemplateService.GetQuestTemplates().Count;
+        _localStorageService.ClearReceivedCalls();
+
+        // Act
+        await _questTemplateService.DeleteQuestTemplateAsync(Guid.NewGuid());
+
+        // Assert
+        Assert.Equal(initialCount, _questTemplateService.GetQuestTemplates().Count);
+        await _localStorageService.DidNotReceive().SetItemAsync(
+            Arg.Any<string>(),
+            Arg.Any<List<QuestTemplate>>());
+    }
+
+    [Fact]
+    public async Task DeleteQuestTemplateAsync_PersistsToStorage()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "To Delete", BaseXp = 10, Category = "test" }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        _localStorageService.ClearReceivedCalls();
+
+        // Act
+        await _questTemplateService.DeleteQuestTemplateAsync(templateId);
+
+        // Assert
+        await _localStorageService.Received(1).SetItemAsync(
+            "questTemplates",
+            Arg.Is<List<QuestTemplate>>(list => !list.Any(t => t.Id == templateId)));
+    }
+    
+    [Fact]
+    public async Task ToggleActiveAsync_WhenActive_DeactivatesTemplate()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "Test", BaseXp = 10, Category = "test", IsActive = true }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+
+        // Act
+        await _questTemplateService.ToggleActiveAsync(templateId);
+
+        // Assert
+        var template = _questTemplateService.GetQuestTemplateById(templateId);
+        Assert.NotNull(template);
+        Assert.False(template.IsActive);
+    }
+
+    [Fact]
+    public async Task ToggleActiveAsync_WhenInactive_ActivatesTemplate()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "Test", BaseXp = 10, Category = "test", IsActive = false }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+
+        // Act
+        await _questTemplateService.ToggleActiveAsync(templateId);
+
+        // Assert
+        var template = _questTemplateService.GetQuestTemplateById(templateId);
+        Assert.NotNull(template);
+        Assert.True(template.IsActive);
+    }
+
+    [Fact]
+    public async Task ToggleActiveAsync_WhenNotExists_DoesNothing()
+    {
+        // Arrange
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(false);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        _localStorageService.ClearReceivedCalls();
+
+        // Act
+        await _questTemplateService.ToggleActiveAsync(Guid.NewGuid());
+
+        // Assert
+        await _localStorageService.DidNotReceive().SetItemAsync(
+            Arg.Any<string>(),
+            Arg.Any<List<QuestTemplate>>());
+    }
+
+    [Fact]
+    public async Task ToggleActiveAsync_PersistsToStorage()
+    {
+        // Arrange
+        var templateId = Guid.NewGuid();
+        var storedTemplates = new List<QuestTemplate>
+        {
+            new() { Id = templateId, Title = "Test", BaseXp = 10, Category = "test", IsActive = true }
+        };
+        _localStorageService.ContainKeyAsync("questTemplates").Returns(true);
+        _localStorageService.GetItemAsync<List<QuestTemplate>>("questTemplates").Returns(storedTemplates);
+        await _questTemplateService.LoadQuestTemplatesAsync();
+        _localStorageService.ClearReceivedCalls();
+
+        // Act
+        await _questTemplateService.ToggleActiveAsync(templateId);
+
+        // Assert
+        await _localStorageService.Received(1).SetItemAsync(
+            "questTemplates",
+            Arg.Is<List<QuestTemplate>>(list => list.Any(t => t.Id == templateId && !t.IsActive)));
+    }
 }

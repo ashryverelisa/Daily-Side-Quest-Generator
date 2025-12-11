@@ -10,6 +10,8 @@ public class QuestTemplateService(ILocalStorageService localStorageService) : IQ
     private List<QuestTemplate> _questTemplates = [];
     public List<QuestTemplate> GetQuestTemplates() => _questTemplates;
     
+    public QuestTemplate? GetQuestTemplateById(Guid id) => _questTemplates.FirstOrDefault(t => t.Id == id);
+    
     public async Task LoadQuestTemplatesAsync()
     {
         if (await localStorageService.ContainKeyAsync(QuestTemplateStorageKey))
@@ -19,7 +21,49 @@ public class QuestTemplateService(ILocalStorageService localStorageService) : IQ
         else
         {
             SeedTemplates();
-            await PersistEnabledAsync();
+            await PersistAsync();
+        }
+    }
+
+    public async Task AddQuestTemplateAsync(QuestTemplate template)
+    {
+        template.Id = Guid.NewGuid();
+        _questTemplates.Add(template);
+        await PersistAsync();
+    }
+
+    public async Task UpdateQuestTemplateAsync(QuestTemplate template)
+    {
+        var existing = _questTemplates.FirstOrDefault(t => t.Id == template.Id);
+        if (existing is null) return;
+        
+        existing.Title = template.Title;
+        existing.Description = template.Description;
+        existing.BaseXp = template.BaseXp;
+        existing.Category = template.Category;
+        existing.RarityWeight = template.RarityWeight;
+        existing.IsActive = template.IsActive;
+        
+        await PersistAsync();
+    }
+
+    public async Task DeleteQuestTemplateAsync(Guid id)
+    {
+        var template = _questTemplates.FirstOrDefault(t => t.Id == id);
+        if (template is not null)
+        {
+            _questTemplates.Remove(template);
+            await PersistAsync();
+        }
+    }
+
+    public async Task ToggleActiveAsync(Guid id)
+    {
+        var template = _questTemplates.FirstOrDefault(t => t.Id == id);
+        if (template is not null)
+        {
+            template.IsActive = !template.IsActive;
+            await PersistAsync();
         }
     }
 
@@ -42,7 +86,7 @@ public class QuestTemplateService(ILocalStorageService localStorageService) : IQ
         ];
     }
 
-    private async Task PersistEnabledAsync()
+    private async Task PersistAsync()
     {
         var snapshot = _questTemplates.ToList();
         await localStorageService.SetItemAsync(QuestTemplateStorageKey, snapshot);
