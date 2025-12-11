@@ -10,7 +10,7 @@ public interface IQuestService
     /// </summary>
     /// <returns>A read-only list of <see cref="DailyQuest"/> objects for today.</returns>
     Task<IReadOnlyList<DailyQuest>> GetTodaysQuestsAsync();
-    
+
     /// <summary>
     /// Toggles the completion state of a specific daily quest.
     /// If the quest is marked as completed, XP and streak will be updated accordingly.

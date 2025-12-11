@@ -25,7 +25,7 @@ public class UserProgressService(ILocalStorageService localStorageService) : IUs
         }
     }
 
-    public Task SaveAsync() => localStorageService.SetItemAsync(StorageKey, Progress).AsTask();
+    public async Task SaveAsync() => await localStorageService.SetItemAsync(StorageKey, Progress);
 
     public async Task AddXpAsync(int xp)
     {
