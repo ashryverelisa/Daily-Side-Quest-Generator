@@ -1,20 +1,15 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 
 <div class="app-shell">
     <div class="header">
         <h2>Daily Side-Quests</h2>
     </div>
-
-    <div class="card">
-        <h3>Progress</h3>
-        <div>
-            <strong>Level:</strong> @UserProgressService.Progress.Level
-            <span style="margin-left: 12px;"><strong>Total XP:</strong> @UserProgressService.Progress.TotalXp</span>
-            <span style="margin-left: 12px;"><strong>Streak:</strong> @UserProgressService.Progress.DailyStreak</span>
-        </div>
-    </div>
-
+    @if (_levelInfo is not null)
+    {
+        <LevelDisplay LevelInfo="_levelInfo" ShowAnimation="_showLevelUpAnimation" />
+        <XpBar LevelInfo="_levelInfo" Animate="_animateXpBar" />
+    }
     @if (_quests is null)
     {
         <div class="card">Loading...</div>
@@ -31,3 +26,4 @@
         }
     }
 </div>
+<XpNotification XpEvent="_lastXpEvent" IsVisible="_showXpNotification" OnDismiss="DismissNotification" />

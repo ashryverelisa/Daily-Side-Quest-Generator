@@ -7,7 +7,7 @@ namespace DailySideQuestGenerator.Components.Shared;
 public partial class QuestCard
 {
     [Parameter] public DailyQuest Quest { get; set; } = null!;
-    [Parameter] public EventCallback OnToggled { get; set; }
+    [Parameter] public EventCallback<QuestToggleResult> OnToggled { get; set; }
     [Inject] private IQuestService QuestService { get; set; } = null!;
     [Inject] private ICategoryService CategoryService { get; set; } = null!;
 
@@ -29,7 +29,7 @@ public partial class QuestCard
     
     private async Task ToggleComplete()
     {
-        await QuestService.ToggleCompleteAsync(Quest.Id);
-        if (OnToggled.HasDelegate) await OnToggled.InvokeAsync(null);
+        var result = await QuestService.ToggleCompleteAsync(Quest.Id);
+        if (OnToggled.HasDelegate) await OnToggled.InvokeAsync(result);
     }
 }

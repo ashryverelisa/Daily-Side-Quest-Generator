@@ -1,0 +1,50 @@
+@using DailySideQuestGenerator.Models
+
+@if (IsVisible)
+{
+    <div class="xp-notification @(LeveledUp ? "level-up" : "")" @onclick="Dismiss">
+        <div class="notification-content">
+            @if (LeveledUp)
+            {
+                <div class="level-up-header">
+                    <span class="level-up-icon">🎉</span>
+                    <span class="level-up-text">LEVEL UP!</span>
+                    <span class="level-up-icon">🎉</span>
+                </div>
+                <div class="new-level">Level @XpEvent?.NewLevel</div>
+            }
+            
+            <div class="xp-gained">
+                <span class="xp-value">+@XpEvent?.XpGained XP</span>
+                @if (XpEvent?.StreakBonus > 0)
+                {
+                    <span class="streak-bonus">+@XpEvent.StreakBonus bonus</span>
+                }
+            </div>
+            
+            <div class="progress-info">
+                @(XpEvent?.XpToNextLevel) XP to next level
+            </div>
+        </div>
+        <div class="notification-progress">
+            <div class="notification-progress-fill" style="width: @(XpEvent?.ProgressPercentage ?? 0)%"></div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public XpEvent? XpEvent { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnDismiss { get; set; }
+    
+    private bool LeveledUp => XpEvent?.LeveledUp ?? false;
+    
+    private async Task Dismiss()
+    {
+        if (OnDismiss.HasDelegate)
+        {
+            await OnDismiss.InvokeAsync();
+        }
+    }
+}
+

@@ -1,0 +1,32 @@
+@page "/xp-bar"
+@rendermode InteractiveServer
+@using DailySideQuestGenerator.Models
+
+<div class="xp-bar-container @(Animate ? "animate-xp" : "")">
+    <div class="level-badge">
+        <span class="level-number">@LevelInfo.Level</span>
+    </div>
+    <div class="xp-bar-wrapper">
+        <div class="xp-bar-track">
+            <div class="xp-bar-fill" style="width: @(LevelInfo.ProgressPercentage)%"></div>
+            <div class="xp-bar-glow" style="width: @(LevelInfo.ProgressPercentage)%"></div>
+        </div>
+        <div class="xp-bar-text">
+            <span class="xp-current">@LevelInfo.XpProgressInLevel</span>
+            <span class="xp-separator">/</span>
+            <span class="xp-needed">@LevelInfo.XpNeededForNextLevel XP</span>
+        </div>
+    </div>
+    @if (LevelInfo.DailyStreak > 0)
+    {
+        <div class="streak-badge" title="@LevelInfo.StreakMultiplier% XP Bonus">
+            <span class="streak-icon">🔥</span>
+            <span class="streak-count">@LevelInfo.DailyStreak</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public LevelInfo LevelInfo { get; set; } = new();
+    [Parameter] public bool Animate { get; set; } = false;
+}
