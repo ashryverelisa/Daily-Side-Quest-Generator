@@ -1,0 +1,275 @@
+/* Quest Card Component Styles */
+.quest-card {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative top border gradient */
+.quest-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        transparent, 
+        var(--quest-accent-color, rgba(139, 92, 246, 0.6)), 
+        transparent);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.quest-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.quest-card:hover::before {
+    opacity: 1;
+}
+
+/* Quest card content layout */
+.quest-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.quest-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Quest icon based on category */
+.quest-icon {
+    font-size: 1.5rem;
+    margin-right: 8px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Quest title styling */
+.quest-card .quest-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #e6eef8;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+/* Quest details row */
+.quest-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* Enhanced category badge */
+.quest-card .category-badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.quest-card .category-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.25), transparent);
+    border-radius: 20px 20px 0 0;
+}
+
+/* XP badge styling */
+.xp-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.xp-badge::before {
+    content: "✨";
+    font-size: 0.85rem;
+}
+
+/* Complete button */
+.quest-card .complete-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 120px;
+    text-align: center;
+}
+
+.quest-card .complete-btn:hover:not(.completed) {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(22, 163, 74, 0.15));
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #22c55e;
+    transform: scale(1.03);
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+}
+
+.quest-card .complete-btn:active:not(.completed) {
+    transform: scale(0.97);
+}
+
+/* Completed state */
+.quest-card .complete-btn.completed {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-color: #22c55e;
+    color: #021014;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    animation: completedPulse 2s ease-in-out infinite;
+}
+
+@keyframes completedPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(34, 197, 94, 0.5);
+    }
+}
+
+/* Completed quest card styling */
+.quest-card.completed {
+    opacity: 0.85;
+    background: linear-gradient(180deg, 
+        rgba(34, 197, 94, 0.1), 
+        rgba(15, 23, 42, 0.95));
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.quest-card.completed::before {
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(34, 197, 94, 0.6), 
+        transparent);
+}
+
+.quest-card.completed .quest-title {
+    color: rgba(230, 238, 248, 0.7);
+}
+
+/* Completion animation */
+.quest-card.just-completed {
+    animation: questCompleteFlash 0.6s ease-out;
+}
+
+@keyframes questCompleteFlash {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    30% {
+        transform: scale(1.02);
+        box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.4),
+            0 0 60px rgba(34, 197, 94, 0.6);
+    }
+    60% {
+        transform: scale(0.98);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Floating animation for icons */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .quest-card {
+        padding: 14px 16px;
+    }
+    
+    .quest-card-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+    
+    .quest-card .quest-title {
+        font-size: 1rem;
+    }
+    
+    .quest-card .complete-btn {
+        width: 100%;
+        padding: 14px;
+    }
+    
+    .quest-details {
+        gap: 8px;
+    }
+    
+    .quest-card .category-badge {
+        font-size: 0.68rem;
+        padding: 4px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .quest-card {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .quest-icon {
+        font-size: 1.3rem;
+    }
+}
+

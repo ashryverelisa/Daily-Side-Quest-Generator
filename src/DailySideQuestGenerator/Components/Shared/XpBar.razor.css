@@ -1,46 +1,81 @@
 .xp-bar-container {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    gap: 14px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .level-badge {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
     border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4), inset 0 1px 1px rgba(255,255,255,0.3);
+    box-shadow: 
+        0 4px 12px rgba(251, 191, 36, 0.5), 
+        inset 0 2px 2px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shine effect on level badge */
+.level-badge::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 70%
+    );
+    animation: badge-shine 3s ease-in-out infinite;
+}
+
+@keyframes badge-shine {
+    0%, 100% {
+        transform: translateX(-100%) rotate(45deg);
+    }
+    50% {
+        transform: translateX(100%) rotate(45deg);
+    }
 }
 
 .level-number {
-    font-size: 1.3rem;
-    font-weight: 800;
+    font-size: 1.4rem;
+    font-weight: 900;
     color: #1a1a2e;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    position: relative;
+    z-index: 1;
 }
 
 .xp-bar-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .xp-bar-track {
     position: relative;
-    height: 16px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 8px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .xp-bar-fill {
@@ -49,8 +84,9 @@
     left: 0;
     height: 100%;
     background: linear-gradient(90deg, #22c55e, #16a34a, #15803d);
-    border-radius: 8px;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 9px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
 }
 
 .xp-bar-glow {
@@ -58,45 +94,183 @@
     top: 0;
     left: 0;
     height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
-    border-radius: 8px 8px 0 0;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.35), transparent);
+    border-radius: 9px 9px 0 0;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* XP bar particles effect */
+.xp-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.8);
+    opacity: 0.8;
 }
 
 .xp-bar-text {
     display: flex;
     justify-content: center;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.7);
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
 }
 
 .xp-current {
     color: #22c55e;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .xp-separator {
-    margin: 0 2px;
+    margin: 0 3px;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .xp-needed {
-    color: rgba(255,255,255,0.5);
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .streak-badge {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 10px;
+    gap: 5px;
+    padding: 8px 14px;
     background: linear-gradient(135deg, #f97316, #ea580c);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.45);
     flex-shrink: 0;
 }
 
 .streak-icon {
-    font-size: 1rem;
+    font-size: 1.1rem;
     animation: flame-flicker 0.5s ease-in-out infinite alternate;
+}
+
+.streak-count {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes flame-flicker {
+    from {
+        transform: scale(1) rotate(-3deg);
+    }
+    to {
+        transform: scale(1.1) rotate(3deg);
+    }
+}
+
+/* XP Gain Animation */
+.animate-xp .xp-bar-fill {
+    animation: xp-pulse 0.6s ease-out;
+}
+
+.animate-xp .level-badge {
+    animation: badge-pop 0.4s ease-out;
+}
+
+@keyframes xp-pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.9), 0 0 50px rgba(34, 197, 94, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+}
+
+@keyframes badge-pop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .xp-bar-container {
+        gap: 12px;
+        padding: 10px 14px;
+    }
+    
+    .level-badge {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .level-number {
+        font-size: 1.2rem;
+    }
+    
+    .xp-bar-track {
+        height: 14px;
+    }
+    
+    .streak-badge {
+        padding: 6px 10px;
+    }
+    
+    .streak-count {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .xp-bar-container {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+    
+    .level-badge {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .level-number {
+        font-size: 1.1rem;
+    }
+    
+    .xp-bar-wrapper {
+        order: 3;
+        width: 100%;
+    }
+    
+    .xp-bar-track {
+        height: 12px;
+    }
+    
+    .xp-bar-text {
+        font-size: 0.72rem;
+    }
+    
+    .streak-badge {
+        padding: 5px 10px;
+        border-radius: 10px;
+    }
+    
+    .streak-icon {
+        font-size: 1rem;
+    }
+    
+    .streak-count {
+        font-size: 0.8rem;
+    }
 }
 
 .streak-count {
