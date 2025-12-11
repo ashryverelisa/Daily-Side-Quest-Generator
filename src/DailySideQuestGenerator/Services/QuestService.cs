@@ -3,7 +3,11 @@ using DailySideQuestGenerator.Services.Interfaces;
 
 namespace DailySideQuestGenerator.Services;
 
-public class QuestService(IQuestTemplateService questTemplateService, IUserProgressService userProgressService, IDailyQuestService dailyQuestService) : IQuestService
+public class QuestService(
+    IQuestTemplateService questTemplateService, 
+    IUserProgressService userProgressService, 
+    IDailyQuestService dailyQuestService,
+    IXpService xpService) : IQuestService
 {
     private readonly List<DailyQuest> _generated = [];
     private bool _initialized;
@@ -22,7 +26,7 @@ public class QuestService(IQuestTemplateService questTemplateService, IUserProgr
     }
 
 
-    public async Task<DailyQuest> ToggleCompleteAsync(Guid dailyQuestId)
+    public async Task<QuestToggleResult> ToggleCompleteAsync(Guid dailyQuestId)
     {
         await InitializeIfNeededAsync();
 
@@ -31,20 +35,34 @@ public class QuestService(IQuestTemplateService questTemplateService, IUserProgr
 
         q.IsCompleted = !q.IsCompleted;
 
+        QuestToggleResult result;
+        
         if (q.IsCompleted)
         {
-            await userProgressService.AddXpAsync(q.Xp);
-            await userProgressService.UpdateStreakAsync();
+            var xpEvent = await xpService.AwardQuestXpAsync(q.Xp);
+            result = new QuestToggleResult
+            {
+                Quest = q,
+                XpEvent = xpEvent,
+                LevelInfo = xpService.GetLevelInfo(),
+                WasCompleted = true
+            };
         }
         else
         {
-            await userProgressService.RemoveXpAsync(q.Xp);
-            await userProgressService.DecrementStreakAsync();
+            var levelInfo = await xpService.RemoveQuestXpAsync(q.Xp);
+            result = new QuestToggleResult
+            {
+                Quest = q,
+                XpEvent = null,
+                LevelInfo = levelInfo,
+                WasCompleted = false
+            };
         }
 
         await dailyQuestService.SaveAsync();
         
-        return q;
+        return result;
     }
 
     public async Task InitializeIfNeededAsync()

@@ -16,6 +16,8 @@ builder.Services.AddScoped<IDailyQuestService, DailyQuestService>();
 builder.Services.AddScoped<IUserProgressService, UserProgressService>();
 builder.Services.AddScoped<IQuestTemplateService, QuestTemplateService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IXpService, XpService>();
+builder.Services.AddScoped<ISoundService, SoundService>();
 
 var app = builder.Build();
 

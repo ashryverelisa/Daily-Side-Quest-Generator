@@ -10,6 +10,7 @@ public class QuestServiceTests
     private readonly IQuestTemplateService _questTemplateService;
     private readonly IUserProgressService _userProgressService;
     private readonly IDailyQuestService _dailyQuestService;
+    private readonly IXpService _xpService;
     private readonly QuestService _questService;
 
     public QuestServiceTests()
@@ -17,7 +18,14 @@ public class QuestServiceTests
         _questTemplateService = Substitute.For<IQuestTemplateService>();
         _userProgressService = Substitute.For<IUserProgressService>();
         _dailyQuestService = Substitute.For<IDailyQuestService>();
-        _questService = new QuestService(_questTemplateService, _userProgressService, _dailyQuestService);
+        _xpService = Substitute.For<IXpService>();
+        
+        // Setup default returns for XpService
+        _xpService.AwardQuestXpAsync(Arg.Any<int>()).Returns(new XpEvent());
+        _xpService.RemoveQuestXpAsync(Arg.Any<int>()).Returns(new LevelInfo());
+        _xpService.GetLevelInfo().Returns(new LevelInfo());
+        
+        _questService = new QuestService(_questTemplateService, _userProgressService, _dailyQuestService, _xpService);
     }
     
     [Fact]
@@ -141,7 +149,7 @@ public class QuestServiceTests
         var result = await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        Assert.True(result.IsCompleted);
+        Assert.True(result.Quest.IsCompleted);
     }
 
     [Fact]
@@ -157,11 +165,11 @@ public class QuestServiceTests
         var result = await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        Assert.False(result.IsCompleted);
+        Assert.False(result.Quest.IsCompleted);
     }
 
     [Fact]
-    public async Task ToggleCompleteAsync_WhenCompleting_AddsXp()
+    public async Task ToggleCompleteAsync_WhenCompleting_AwardsXpViaXpService()
     {
         // Arrange
         var questId = Guid.NewGuid();
@@ -173,27 +181,31 @@ public class QuestServiceTests
         await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        await _userProgressService.Received(1).AddXpAsync(15);
+        await _xpService.Received(1).AwardQuestXpAsync(15);
     }
 
     [Fact]
-    public async Task ToggleCompleteAsync_WhenCompleting_UpdatesStreak()
+    public async Task ToggleCompleteAsync_WhenCompleting_ReturnsXpEvent()
     {
         // Arrange
         var questId = Guid.NewGuid();
         var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = false, DateGenerated = DateTime.UtcNow };
         _dailyQuestService.DailyQuests.Returns([quest]);
+        var expectedXpEvent = new XpEvent { XpGained = 10, NewLevel = 2 };
+        _xpService.AwardQuestXpAsync(10).Returns(expectedXpEvent);
         await _questService.GetTodaysQuestsAsync();
 
         // Act
-        await _questService.ToggleCompleteAsync(questId);
+        var result = await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        await _userProgressService.Received(1).UpdateStreakAsync();
+        Assert.NotNull(result.XpEvent);
+        Assert.Equal(10, result.XpEvent.XpGained);
+        Assert.True(result.WasCompleted);
     }
 
     [Fact]
-    public async Task ToggleCompleteAsync_WhenUncompleted_RemovesXp()
+    public async Task ToggleCompleteAsync_WhenUncompleted_RemovesXpViaXpService()
     {
         // Arrange
         var questId = Guid.NewGuid();
@@ -205,23 +217,27 @@ public class QuestServiceTests
         await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        await _userProgressService.Received(1).RemoveXpAsync(20);
+        await _xpService.Received(1).RemoveQuestXpAsync(20);
     }
 
     [Fact]
-    public async Task ToggleCompleteAsync_WhenUncompleted_DecrementsStreak()
+    public async Task ToggleCompleteAsync_WhenUncompleted_ReturnsLevelInfoAndNoXpEvent()
     {
         // Arrange
         var questId = Guid.NewGuid();
         var quest = new DailyQuest { Id = questId, Title = "Test Quest", Xp = 10, IsCompleted = true, DateGenerated = DateTime.UtcNow };
         _dailyQuestService.DailyQuests.Returns([quest]);
+        var expectedLevelInfo = new LevelInfo { Level = 5, TotalXp = 500 };
+        _xpService.RemoveQuestXpAsync(10).Returns(expectedLevelInfo);
         await _questService.GetTodaysQuestsAsync();
 
         // Act
-        await _questService.ToggleCompleteAsync(questId);
+        var result = await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        await _userProgressService.Received(1).DecrementStreakAsync();
+        Assert.Null(result.XpEvent);
+        Assert.NotNull(result.LevelInfo);
+        Assert.False(result.WasCompleted);
     }
 
     [Fact]
@@ -254,7 +270,7 @@ public class QuestServiceTests
     }
 
     [Fact]
-    public async Task ToggleCompleteAsync_ReturnsUpdatedQuest()
+    public async Task ToggleCompleteAsync_ReturnsQuestToggleResultWithQuest()
     {
         // Arrange
         var questId = Guid.NewGuid();
@@ -266,9 +282,9 @@ public class QuestServiceTests
         var result = await _questService.ToggleCompleteAsync(questId);
 
         // Assert
-        Assert.Equal(questId, result.Id);
-        Assert.Equal("Test Quest", result.Title);
-        Assert.Equal(10, result.Xp);
+        Assert.Equal(questId, result.Quest.Id);
+        Assert.Equal("Test Quest", result.Quest.Title);
+        Assert.Equal(10, result.Quest.Xp);
     }
 
     [Fact]
