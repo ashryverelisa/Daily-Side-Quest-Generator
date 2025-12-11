@@ -11,20 +11,26 @@
         <LevelDisplay LevelInfo="_levelInfo" ShowAnimation="_showLevelUpAnimation" />
         <XpBar LevelInfo="_levelInfo" Animate="_animateXpBar" />
     }
-    @if (_quests is null)
-    {
-        <div class="card">Loading...</div>
-    }
-    else if (!_quests.Any())
-    {
-        <div class="card">No quests for today.</div>
-    }
-    else
-    {
-        @foreach (var quest in _quests)
+    <div class="quests-container">
+        @if (_quests is null)
         {
-            <QuestCard Quest="quest" OnToggled="OnToggled"></QuestCard>
+            <div class="card loading-shimmer">
+                <p style="text-align: center; padding: 20px; margin: 0;">Loading your quests...</p>
+            </div>
         }
-    }
+        else if (!_quests.Any())
+        {
+            <div class="card empty-state">
+                <p style="margin: 0;">No quests for today. Create some templates to get started!</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var quest in _quests)
+            {
+                <QuestCard Quest="quest" OnToggled="OnToggled"></QuestCard>
+            }
+        }
+    </div>
 </div>
 <XpNotification XpEvent="_lastXpEvent" IsVisible="_showXpNotification" OnDismiss="DismissNotification" />

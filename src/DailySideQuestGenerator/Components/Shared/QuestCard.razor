@@ -1,11 +1,16 @@
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <div class="quest-title">@Quest.Title</div>
-            <div class="category-badge" style="background-color:@_categoryColor;">
-                @_categoryName
+<div class="quest-card @CompletedClass @JustCompletedClass" style="--quest-accent-color: @_categoryColor;">
+    <div class="quest-card-content">
+        <div class="quest-card-info">
+            <div class="quest-title">
+                <span class="quest-icon">@CategoryIcon</span>
+                @Quest.Title
             </div>
-            <div class="quest-meta">@Quest.Xp XP</div>
+            <div class="quest-details">
+                <span class="category-badge" style="background-color: @_categoryColor;">
+                    @_categoryName
+                </span>
+                <span class="xp-badge">@Quest.Xp XP</span>
+            </div>
         </div>
         <div class="quest-actions">
             <button class="@CompleteButtonClass" @onclick="ToggleComplete">
