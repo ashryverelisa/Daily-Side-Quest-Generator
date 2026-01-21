@@ -34,7 +34,7 @@ public class DailyQuestService(ILocalStorageService localStorageService, ICatego
 
         await categoryService.LoadCategoriesAsync();
         
-        var enabledCategories = ( categoryService.GetEnabledCategoriesAsync()).ToHashSet();
+        var enabledCategories = ( categoryService.GetEnabledCategories()).ToHashSet();
         _templates = questTemplateService.GetQuestTemplates();
         
         var activeTemplates = _templates

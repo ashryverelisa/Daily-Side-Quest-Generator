@@ -182,6 +182,6 @@ public partial class QuestTemplateEditor : ComponentBase
 
     private string GetCategoryColor(string categoryName)
     {
-        return CategoryService.GetCategoryColorAsync(categoryName) ?? "#888888";
+        return CategoryService.GetCategoryColor(categoryName) ?? "#888888";
     }
 }

@@ -48,7 +48,7 @@ public partial class QuestCard
 
     protected override void OnInitialized()
     {
-        var category = CategoryService.GetCategoryColorAsync(Quest.Category);
+        var category = CategoryService.GetCategoryColor(Quest.Category);
         
         if (category != null)
         {

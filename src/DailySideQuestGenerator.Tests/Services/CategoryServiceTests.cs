@@ -114,7 +114,7 @@ public class CategoryServiceTests
         await _categoryService.LoadCategoriesAsync();
 
         // Act
-        var result = _categoryService.GetCategoryColorAsync("health");
+        var result = _categoryService.GetCategoryColor("health");
 
         // Assert
         Assert.Equal("#28a745", result);
@@ -128,7 +128,7 @@ public class CategoryServiceTests
         await _categoryService.LoadCategoriesAsync();
 
         // Act
-        var result = _categoryService.GetCategoryColorAsync("nonexistent");
+        var result = _categoryService.GetCategoryColor("nonexistent");
 
         // Assert
         Assert.Null(result);
@@ -138,7 +138,7 @@ public class CategoryServiceTests
     public void GetCategoryColorAsync_WhenNotLoaded_ReturnsNull()
     {
         // Act
-        var result = _categoryService.GetCategoryColorAsync("health");
+        var result = _categoryService.GetCategoryColor("health");
 
         // Assert
         Assert.Null(result);
@@ -152,7 +152,7 @@ public class CategoryServiceTests
         await _categoryService.LoadCategoriesAsync();
 
         // Act
-        var result = _categoryService.GetCategoryColorAsync("HEALTH");
+        var result = _categoryService.GetCategoryColor("HEALTH");
 
         // Assert - The current implementation is case-sensitive, so this should return null
         Assert.Null(result);
@@ -166,7 +166,7 @@ public class CategoryServiceTests
         await _categoryService.LoadCategoriesAsync();
 
         // Act
-        var result = _categoryService.GetEnabledCategoriesAsync();
+        var result = _categoryService.GetEnabledCategories();
 
         // Assert
         Assert.Equal(7, result.Count);
@@ -195,7 +195,7 @@ public class CategoryServiceTests
         await _categoryService.LoadCategoriesAsync();
 
         // Act
-        var result = _categoryService.GetEnabledCategoriesAsync();
+        var result = _categoryService.GetEnabledCategories();
 
         // Assert
         Assert.Equal(2, result.Count);
@@ -219,7 +219,7 @@ public class CategoryServiceTests
         await _categoryService.LoadCategoriesAsync();
 
         // Act
-        var result = _categoryService.GetEnabledCategoriesAsync();
+        var result = _categoryService.GetEnabledCategories();
 
         // Assert
         Assert.Empty(result);
@@ -229,7 +229,7 @@ public class CategoryServiceTests
     public void GetEnabledCategoriesAsync_WhenNotLoaded_ReturnsEmptyList()
     {
         // Act
-        var result = _categoryService.GetEnabledCategoriesAsync();
+        var result = _categoryService.GetEnabledCategories();
 
         // Assert
         Assert.Empty(result);

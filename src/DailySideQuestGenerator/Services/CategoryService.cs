@@ -25,9 +25,9 @@ public class CategoryService(ILocalStorageService localStorageService) : ICatego
         }
     }
     
-    public string? GetCategoryColorAsync(string categoryName) => _categories.FirstOrDefault(x => x.Name.Equals(categoryName))?.Color;
+    public string? GetCategoryColor(string categoryName) => _categories.FirstOrDefault(x => x.Name.Equals(categoryName))?.Color;
 
-    public IReadOnlyList<string> GetEnabledCategoriesAsync() => _categories.Where(x => x.Enabled).Select(x => x.Name).ToList();
+    public IReadOnlyList<string> GetEnabledCategories() => _categories.Where(x => x.Enabled).Select(x => x.Name).ToList();
 
     private void SeedCategories()
     {

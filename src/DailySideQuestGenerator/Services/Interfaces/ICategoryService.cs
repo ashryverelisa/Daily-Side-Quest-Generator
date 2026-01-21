@@ -6,6 +6,6 @@ public interface ICategoryService
 {
     List<Category> GetCategoriesAsync();
     Task LoadCategoriesAsync();
-    string? GetCategoryColorAsync(string categoryName);
-    IReadOnlyList<string> GetEnabledCategoriesAsync();
+    string? GetCategoryColor(string categoryName);
+    IReadOnlyList<string> GetEnabledCategories();
 }

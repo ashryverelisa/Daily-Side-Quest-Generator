@@ -201,7 +201,7 @@ public class DailyQuestServiceTests
             .Returns((List<DailyQuest>?)null);
         
         var enabledCategories = new List<string> { "health", "fun" };
-        _categoryService.GetEnabledCategoriesAsync().Returns(enabledCategories);
+        _categoryService.GetEnabledCategories().Returns(enabledCategories);
         
         var templates = new List<QuestTemplate>
         {
@@ -229,7 +229,7 @@ public class DailyQuestServiceTests
             .Returns((List<DailyQuest>?)null);
         
         var enabledCategories = new List<string> { "health" };
-        _categoryService.GetEnabledCategoriesAsync().Returns(enabledCategories);
+        _categoryService.GetEnabledCategories().Returns(enabledCategories);
         
         var inactiveTemplateId = Guid.NewGuid();
         var templates = new List<QuestTemplate>
@@ -258,7 +258,7 @@ public class DailyQuestServiceTests
             .Returns((List<DailyQuest>?)null);
         
         var enabledCategories = new List<string> { "health" };
-        _categoryService.GetEnabledCategoriesAsync().Returns(enabledCategories);
+        _categoryService.GetEnabledCategories().Returns(enabledCategories);
         
         var templateId = Guid.NewGuid();
         var templates = new List<QuestTemplate>
@@ -285,7 +285,7 @@ public class DailyQuestServiceTests
         _localStorageService.GetItemAsync<List<DailyQuest>>("dailyQuests")
             .Returns((List<DailyQuest>?)null);
         
-        _categoryService.GetEnabledCategoriesAsync().Returns(new List<string> { "health" });
+        _categoryService.GetEnabledCategories().Returns(new List<string> { "health" });
         _questTemplateService.GetQuestTemplates().Returns([]);
 
         // Act
@@ -365,7 +365,7 @@ public class DailyQuestServiceTests
             .Returns((List<DailyQuest>?)null);
         
         var enabledCategories = new List<string> { "test" };
-        _categoryService.GetEnabledCategoriesAsync().Returns(enabledCategories);
+        _categoryService.GetEnabledCategories().Returns(enabledCategories);
         
         var highWeightId = Guid.NewGuid();
         var lowWeightId = Guid.NewGuid();
@@ -398,7 +398,7 @@ public class DailyQuestServiceTests
     private void SetupDefaultTemplatesAndCategories()
     {
         var enabledCategories = new List<string> { "health", "chores", "fun" };
-        _categoryService.GetEnabledCategoriesAsync().Returns(enabledCategories);
+        _categoryService.GetEnabledCategories().Returns(enabledCategories);
         
         var templates = new List<QuestTemplate>
         {

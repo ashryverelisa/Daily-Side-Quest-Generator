@@ -150,4 +150,3 @@ public class XpService(IUserProgressService userProgressService) : IXpService
         return GetLevelInfo();
     }
 }
-
